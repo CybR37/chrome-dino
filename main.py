@@ -297,7 +297,7 @@ def jeu():
 
         keys = pygame.key.get_pressed()     #Récupère les touches préssées pour savoir si la touche flèche bas est préssée
         acc_moy = (acc_saut_min + acc_saut_max)/2 #on fait la moyenne des accélérations extrêmes pour utiliser cette moyenne afin de définir si on a fait un saut long ou court
-        if keys[K_DOWN]: dino.accroupi = True
+        if keys[K_DOWN] or keys[K_s]: dino.accroupi = True
         else: dino.accroupi = False
 
         charge_jump_old = charge_jump #charge_jump_old prend la valeur que possède charge_jump
