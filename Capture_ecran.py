@@ -10,6 +10,13 @@ import pyautogui
 from entre_direct import PressKey, ReleaseKey, W, S,D
 from collections import deque
 import random
+from keras import backend as K
+K.tensorflow_backend._get_available_gpus()
+config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} ) 
+sess = tf.Session(config=config) 
+keras.backend.set_session(sess)
+
+
 liste = [0, "False"]
 
 def read_file(): #Fonction utilisée pour lire le texte de globales.txt
@@ -29,17 +36,18 @@ def read_file(): #Fonction utilisée pour lire le texte de globales.txt
 
 #paramètres du jeu
 GAMMA = 0.99 # diminution des observations passé original 0.99
-OBSERVATION = 50000 # étape de temps avant de commencer l'entrainement
+OBSERVATION = 5000. # étape de temps avant de commencer l'entrainement
 EXPLORE = 10000  # nombre d'images sur lesquelles on diminue epsilon
 FINAL_EPSILON = 0.0001 # valeur finale d'epsilon epsilon
 INITIAL_EPSILON = 0.1 # valeur de départ d'epsilon
-REPLAY_MEMORY = 50000 # nombre d'essais précedent à se rappeler
+REPLAY_MEMORY = 5000 # nombre d'essais précedent à se rappeler
 BATCH = 32 # taille du mini batch
 FRAME_PER_ACTION = 1
 
 def process_img(printscreen):
-    image = cv2.cvtColor(printscreen, cv2.COLOR_BGR2GRAY)
-    Image = image[:260, :900]
+    new_img = cv2.cvtColor(printscreen, cv2.COLOR_BGR2GRAY) #passer l'image en noir et banc
+    ImageBW = cv2.Canny(new_img, threshold1 = 200, threshold2=500) #détecter les contoures des objet du jeux
+    Image = cv2.resize(ImageBW,(80,80))
     return Image
 def screen_record():
     printscreen =  np.array(ImageGrab.grab(bbox=(0,250,900,510))) #Capturer l'image du jeux
@@ -107,7 +115,7 @@ class Game_state:
             is_over = True
         return image, reward, is_over #renvoie l'experience en tuple
 LEARNING_RATE = 1e-4
-img_rows , img_cols = 900,260
+img_rows , img_cols = 80,80
 img_channels = 4 #on met les images par groupe de 4
 ACTIONS = 2
 def buildmodel():
@@ -137,71 +145,85 @@ Parameters:
 * observe => flag to indicate wherther the model is to be trained(weight updates), else just play
 '''
 def trainNetwork(model,game_state):
-    global s_t
-    # store the previous observations in replay memory
-    D = deque() #experience replay memory
-    # get the first state by doing nothing
+    # on enregistre l'observation précedente dans replay memory
+    D = deque() #on charche depuis le système de fichier
+    #on récupère le premier état en faisant rien
     do_nothing = np.zeros(ACTIONS)
-    do_nothing[0] =1 #0 => do nothing,
-                     #1=> jump
+    do_nothing[0] =1 #0 => s'accroupir,
+                     #1=> sauter
 
-    x_t, r_0, terminal = game_state.get_state(do_nothing) # get next step after performing the action
-    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,260,900,4) # stack 4 images to create placeholder input reshaped 1*20*40*4 
+    x_t, r_0, terminal = game_state.get_state(do_nothing) # récuperer la prochaine étape après avoir éffectué une action
+    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,80,80,4) # gropuper 4 images pour créer l'input de 1*260*900*4
+
     OBSERVE = OBSERVATION
     epsilon = INITIAL_EPSILON
     t = 0
-    while (True): #endless running
-        
+    while (True): #boucle sans fin
+
         loss = 0
         Q_sa = 0
         action_index = 0
-        r_t = 0 #reward at t
-        a_t = np.zeros([ACTIONS]) # action at t
+        r_t = 0 #on réinitialise la récompense
+        a_t = np.zeros([ACTIONS]) # on reset l'action
 
-        q = model.predict(s_t)       #input a stack of 4 images, get the prediction
-        max_Q = np.argmax(q)         # chosing index with maximum q value
-        action_index = max_Q 
-        a_t[action_index] = 1        # o=> do nothing, 1=> jump
+        #on choisis une action a effectuer
+        if  random.random() <= epsilon: #on met une action de manière random
+            print("----------Random Action----------")
+            action_index = random.randrange(ACTIONS)
+            a_t[action_index] = 1
+        else: #ou on effectue une action prédit par notre IA
+            q = model.predict(s_t)       #envoie le pack de 4 image préparé à notre réseau de neurones pour qu'il les traite
+            max_Q = np.argmax(q)         # choisir l'index avec la valeur maximum q
+            action_index = max_Q
+            a_t[action_index] = 1     # o=> se baisser, 1=> sauter
+
+        #We reduced the epsilon (exploration parameter) gradually
+        if epsilon > FINAL_EPSILON and t > OBSERVE:
+            epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
         #run the selected action and observed next state and reward
         x_t1, r_t, terminal = game_state.get_state(a_t)
+        last_time = time.time()
         x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x20x40x1
         s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3) # append the new image to input stack and remove the first one
-        
-        D.append((s_t, action_index, r_t, s_t1, terminal))# store the transition 
-        
+
+        # store the transition in D
+        D.append((s_t, action_index, r_t, s_t1, terminal))
+        if len(D) > REPLAY_MEMORY:
+            D.popleft()
+
         #only train if done observing; sample a minibatch to train on
-        trainBatch(random.sample(D, BATCH),s_t) if t > OBSERVE else 0
-        
+        if t > OBSERVE:
+            trainBatch(random.sample(D, BATCH),s_t,model)
         s_t = s_t1
-        t += 1
+        t = t + 1
         print("TIMESTEP", t, "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t,"/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
-def trainBatch(minibatch,s_t):
-  for i in range(0, len(minibatch)):
-                loss = 0
-                inputs = np.zeros((BATCH, s_t.shape[1], s_t.shape[2], s_t.shape[3]))   #32, 20, 40, 4
-                targets = np.zeros((inputs.shape[0], ACTIONS))                         #32, 2
+def trainBatch(minibatch,s_t,model):
+    inputs = np.zeros((BATCH, s_t.shape[1], s_t.shape[2], s_t.shape[3]))   #32, 20, 40, 4
+    targets = np.zeros((inputs.shape[0], ACTIONS))                         #32, 2
+    loss = 0
+
+    for i in range(0, len(minibatch)):
                 state_t = minibatch[i][0]    # 4D stack of images
                 action_t = minibatch[i][1]   #This is action index
                 reward_t = minibatch[i][2]   #reward at state_t due to action_t
                 state_t1 = minibatch[i][3]   #next state
                 terminal = minibatch[i][4]   #wheather the agent died or survided due the action
-                inputs[i:i + 1] = state_t    
+                inputs[i:i + 1] = state_t
                 targets[i] = model.predict(state_t)  # predicted q values
                 Q_sa = model.predict(state_t1)      #predict q values for next step
-                
                 if terminal:
                     targets[i, action_t] = reward_t # if terminated, only equals reward
                 else:
                     targets[i, action_t] = reward_t + GAMMA * np.max(Q_sa)
 
                 loss += model.train_on_batch(inputs, targets)
+#argument: observe, only plays if true, else trains
 def playGame(observe=False):
-    time.sleep(2)
+    time.sleep(0.25)
     game = Game()
     dino = DinoAgent(game)
     game_state = Game_state(dino,game)
-    global model
     model = buildmodel()
     trainNetwork(model,game_state)
 playGame(observe=False)
