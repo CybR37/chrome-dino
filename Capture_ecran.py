@@ -102,19 +102,19 @@ class Game_state:
         is_over = False #game over
         if actions[1] == 1: #sinon se baisser
             self._agent.jump()
-            reward = 0.1*score/11
+            reward = 0.1*score/11 # calcul de récompense dynamique
         else:
             self._agent.duck()
-            reward = 0.1*score/11
-        image = screen_record()
+            reward = 0.1*score/11 # calcul de récompense dynamique
+        image = screen_record() #capturer les images pour la futur action
 
-        if self._agent.is_crashed():
+        if self._agent.is_crashed():#si le dino est mort
             self._game.restart()
-            reward = -11/score
+            reward = -11/score # calcul de récompense dynamique
             is_over = True
         return image, reward, is_over #renvoie l'experience en tuple
 LEARNING_RATE = 1e-4
-img_rows , img_cols = 80,80
+img_rows , img_cols = 80,80 # désigner la taille de l'image entrant dans le réseau
 img_channels = 4 #on met les images par groupe de 4
 ACTIONS = 2
 def buildmodel():
@@ -139,31 +139,31 @@ def buildmodel():
     return model
 '''
 Parameters:
-* model => Keras Model to be trained
-* game_state => Game State module with access to game environment and dino
-* observe => flag to indicate wherther the model is to be trained(weight updates), else just play
+* model => Model Keras qui vas être entrainé
+* game_state => Module Game State qui as accès à l'envirronement et au Dino
+* observe => Variable qui indique si le model doit juste être joué ou entrainé
 '''
 def trainNetwork(model,game_state):
-    # store the previous observations in replay memory
+    # enregistre les observations dans replay memory
     D = deque() #experience replay memory
-    # get the first state by doing nothing
+    # récupérer le premier état en ne faisant rien
     do_nothing = np.zeros(ACTIONS)
-    do_nothing[0] =1 #0 => do nothing,
-                     #1=> jump
+    do_nothing[0] =1 #0 => se baisser,
+                     #1=> sauter
 
-    x_t, r_0, terminal = game_state.get_state(do_nothing) # get next step after performing the action
-    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,80,80,4) # stack 4 images to create placeholder input reshaped 1*20*40*4 
+    x_t, r_0, terminal = game_state.get_state(do_nothing) # récuperer la prochaine étape après avoir effectué une action
+    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,80,80,4) # assembler 4 images pour créer une donnée d'entré redimmensionné à 1*80*80*4 
     
     OBSERVE = OBSERVATION
     epsilon = INITIAL_EPSILON
     t = 0
-    while (True): #endless running
+    while (True): #tourne sans fin
         
         loss = 0
         Q_sa = 0
         action_index = 0
-        r_t = 0 #reward at t
-        a_t = np.zeros([ACTIONS]) # action at t
+        r_t = 0 #récompense à t
+        a_t = np.zeros([ACTIONS]) # action à t
 
         if  random.random() <= epsilon: #on met une action de manière random
             print("----------Action Random ----------")
@@ -179,34 +179,34 @@ def trainNetwork(model,game_state):
         if epsilon > FINAL_EPSILON and t > OBSERVE:
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
-        #run the selected action and observed next state and reward
+        #éxecuter l'action séléctioné et observer l'état suivant et la réconpense
         x_t1, r_t, terminal = game_state.get_state(a_t)
-        x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x20x40x1
-        s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3) # append the new image to input stack and remove the first one
+        x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x80x80x1
+        s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3) # ajoute une nouvelle image au groupe des 4 dernière et retire la plus vielle
         
-        D.append((s_t, action_index, r_t, s_t1, terminal))# store the transition 
+        D.append((s_t, action_index, r_t, s_t1, terminal))# enregistre la transition
         
-        #only train if done observing; sample a minibatch to train on
+        #s'entrainer seulement si on à fini d'observer; échantillonnez un minibatch sur lequel s'entraîner
         trainBatch(random.sample(D, BATCH),s_t,model) if t > OBSERVE else 0
         s_t = s_t1 
         t += 1
         print("TIMESTEP", t, "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t,"/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
 def trainBatch(minibatch,s_t,model):
-    inputs = np.zeros((BATCH, s_t.shape[1], s_t.shape[2], s_t.shape[3]))   #32, 20, 40, 4
+    inputs = np.zeros((BATCH, s_t.shape[1], s_t.shape[2], s_t.shape[3]))   #32, 80, 80, 4
     targets = np.zeros((inputs.shape[0], ACTIONS))                         #32, 2
     loss = 0
 
     for i in range(0, len(minibatch)):
-        state_t = minibatch[i][0]    # 4D stack of images
-        action_t = minibatch[i][1]   #This is action index
-        reward_t = minibatch[i][2]   #reward at state_t due to action_t
-        state_t1 = minibatch[i][3]   #next state
-        terminal = minibatch[i][4]   #wheather the agent died or survided due the action
+        state_t = minibatch[i][0]    # 4D pack d'image
+        action_t = minibatch[i][1]   #c'est l'index de l'action
+        reward_t = minibatch[i][2]   #récompense à state_t en raison de l'action action_t
+        state_t1 = minibatch[i][3]   #état suivant
+        terminal = minibatch[i][4]   #si l'agent est décédé ou a survécu en raison de l'action
         inputs[i:i + 1] = state_t
-        targets[i] = model.predict(state_t)  # predicted q values
-        Q_sa = model.predict(state_t1)      #predict q values for next step
+        targets[i] = model.predict(state_t)  # les valeurs q prédites
+        Q_sa = model.predict(state_t1)      #les valeurs q prédites pour la prochaine étape
         if terminal:
-            targets[i, action_t] = reward_t # if terminated, only equals reward
+            targets[i, action_t] = reward_t # si terminé, seuleument égale à la récompense
         else:
             targets[i, action_t] = reward_t + GAMMA * np.max(Q_sa)
         loss += model.train_on_batch(inputs, targets)
