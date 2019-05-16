@@ -91,13 +91,13 @@ class perso:
     def jump(self, a, jauge): #Est éxécutée en boucle mais ne s'active réellement que quand le saut a été initialisé
         if self.ti!=0:
             if self.sens_jump == 0:
-                acc = a*1.85
+                acc = a*2
             elif self.sens_jump == 1:
                 acc = a
                 if self.vy_initial != 0: #Si vy_initial n'a pas été mis à 0 (par la touche flèche bas) alors on continue de faire monter le dino
                     self.vy_initial = vitesse_y_init*1.35
             if self.accroupi:
-                acc = a*3.7
+                acc = a*4.5
                 self.vy_initial = 0
             t=pygame.time.get_ticks()
             dift=(t-self.ti)
