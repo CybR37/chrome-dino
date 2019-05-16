@@ -142,11 +142,11 @@ def jeu():
 
     sol = pygame.image.load(image_sol).convert_alpha()  #Définition des deux images "sol"
     pos_sol = sol.get_rect(topleft =(0, round(dim_ecran[1]*0.95))) #On utilise les dimensions de l'ecran avec des multiplications/divisions pour garder une valeur relative à l'ecran
-    pos_sol2 = pos_sol.copy()
+    pos_sol2 = pos_sol.copy() #On copie la première pour faire la seconde
     pos_sol2.topleft = (sol.get_width(), round(dim_ecran[1]*0.95))
 
     HI = pygame.image.load(image_HI).convert()
-    HI.set_colorkey((0, 0, 0))
+    HI.set_colorkey((0, 0, 0)) #Tout ce qui est noir dans l'image HI devient transparent
 
     temps_trigger_n = temps(0) #Temps avant éxecution de la fonction pour la première fois
     temps_trigger_obs = temps(3) #Temps avant éxecution de la fonction pour la première fois

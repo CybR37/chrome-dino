@@ -102,8 +102,8 @@ class perso:
             t=pygame.time.get_ticks()
             dift=(t-self.ti)
             """self.y = (acc/2)*(dift**2)-self.vitesse*dift + self.y_initial"""
-            self.vy = acc * dift - self.vy_initial
-            self.pos_jump = self.pos_jump.move(0, self.vy)
+            self.vy = acc * dift - self.vy_initial #Formule MTRUV SI (les valeurs sont à l'opposé de ce que l'on a l'habitude de voir)
+            self.pos_jump = self.pos_jump.move(0, self.vy) #Déplacement du rect avec la vitesse obtenue
             if (jauge == 0 and self.pos_jump.y <= h_saut_min) or (jauge == 1 and self.pos_jump.y <= h_saut_max): self.sens_jump = 0 #sens du dino (0 = vers le bas, 1 = vers le haut)
             if self.pos_jump.y > self.sol: #Donc si pos_jump y est en dessous du sol
                 self.pos_jump.y = self.sol
