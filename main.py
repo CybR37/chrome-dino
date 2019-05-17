@@ -45,7 +45,7 @@ def nuage_f(etat): #Sur le jeu original il peut avoir jusqu'à 4 nuages affiché
         pos_nuage4 = nuage.get_rect(left = dim_ecran[0]+2)
 
     if etat == "r": #r pour récurrent
-        #On définie quels nuage on va bouger (on les "active")
+        #On définie quels nuages on va bouger (on les "active")
         if pygame.time.get_ticks() >= temps_trigger_n:
             if pos_nuage.x == dim_ecran[0]+2: pos_nuage.topleft = (dim_ecran[0]+1, dino.nuage()) #place les nuages à une position y aléatoire, tout à droite de l'ecran pour qu'ils ne soient pas visible au départ
             elif pos_nuage2.x == dim_ecran[0]+2: pos_nuage2.topleft = (dim_ecran[0] +1, dino.nuage())
