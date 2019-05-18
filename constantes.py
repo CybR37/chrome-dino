@@ -60,6 +60,3 @@ acc_saut_max = 0.009 #plus la valeur est basse plus le dino peut aller haut  => 
 h_saut_max = 192 #hauteur maximale du grand saut en y
 variation_acc = 0.02 #plus c'est grand plus on ira vite vers acc hauteur max
 vitesse_y_init = 5.6666667
-
-#Musiques
-pas = os.path.join("sounds", "pas.wav")

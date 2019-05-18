@@ -17,7 +17,6 @@ bg = pygame.transform.scale(bg, dim_ecran) #Adaptation du fond à l'écran
 icone = pygame.image.load(icon_dino_accueil).convert_alpha()
 pygame.display.set_icon(icone)
 pygame.display.set_caption("Chrome Dino IA")
-sound_pas = pygame.mixer.Sound(pas)
 
 dino, pos_nuage, pos_nuage2, pos_nuage3, pos_nuage4, pos_cac, pos_cac2, pos_cac3, cac, cac2, cac3, pos_pte, img_ptero, temps_trigger_n, temps_trigger_obs, pos_sol, vitesse_ptero, hauteurs = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 HIscore = 0
@@ -186,7 +185,6 @@ def jeu():
             dino.etat_d = 0 #on met l'état du dino à 0 qui correspond qu'il a percuté un obstacle
             if dino.accroupi: dino.pos_jump.y = dino.y
             dino.pos_jump.y += 5 #Comme l'image du dino quand il est marche et l'image du dino quand il est mort n'est pas la meme on ajuste alors la position du dino
-            sound_pas.stop()
             #On remet les différentes couches d'image dans l'ordre pour enlever les images à la mauvaise taille/mauvaise position
             ecran.blit(dino.img_score1, (dim_ecran[0]-140, 30))
             ecran.blit(dino.img_score2, (dim_ecran[0]-120, 30))
@@ -353,9 +351,5 @@ def jeu():
                         #Je me dis que si on faisait un graph de l'acc en fct du temps on obtiendrait un logarithme néperien
                         #Faut ptet essayer une fonction exponentielle pour contre-balancer
 while continuer:
-    sound_pas.play(-1)
     jeu()
 pygame.quit()
-#reste à configurer l'acceleration
-#les hitbox pour les collisions
-#donner une petite chance d'avoir les couleurs inversées à chaque centaine
