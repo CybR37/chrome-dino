@@ -80,7 +80,6 @@ def obs():
         else: choix = "cactus"
 
         if choix == "ptero" and pos_pte.x == dim_ecran[0]+2: #Si le choix tombe sur le ptero et si il est disponible/non activé, si il n'est pas disponible alors on ne fait pas apparaitre d'obstacles et on n'actualise pas le temps ce qui veut dire qu'il n'y a pas de temps d'attente pour le prochain obstacle
-
             pos_pte = pos_pte.inflate(put_image_dimension_to_rect(pos_pte, img_ptero)) #On ajuste la taille du rect pour qu'il prenne la forme de l'image
             #Au moment de définir la position du ptero sur y on remonte ou on abaisse le ptero en fonction de l'etat de l'animation du ptero
             if dino.etat_p == 1: pos_pte.midleft = (dim_ecran[0]+1, choice(hauteurs)-12)
@@ -294,10 +293,10 @@ def jeu():
         write_file(dino.score, dino.colli) #met la valeur de la variable collision dans globales.txt
 
         keys = pygame.key.get_pressed()     #Récupère les touches préssées pour savoir si la touche flèche bas est préssée
-        acc_moy = (acc_saut_min + acc_saut_max)/2 #on fait la moyenne des accélérations extrêmes pour utiliser cette moyenne afin de définir si on a fait un saut long ou court
         if keys[K_DOWN] or keys[K_s]: dino.accroupi = True
         else: dino.accroupi = False
 
+        acc_moy = (acc_saut_min + acc_saut_max)/2 #on fait la moyenne des accélérations extrêmes pour utiliser cette moyenne afin de définir si on a fait un saut long ou court
         charge_jump_old = charge_jump #charge_jump_old prend la valeur que possède charge_jump
         if (keys[K_UP] or keys[K_SPACE] or keys[K_d]) and dino.accroupi == False and dino.pos_jump.y == dino.sol: #Si l'une des trois touches est préssée
             charge_jump = True

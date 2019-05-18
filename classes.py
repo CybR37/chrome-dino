@@ -182,7 +182,7 @@ class perso:
         self.vitesse_obs = vitesse_sol + t"""
 
     def check_colli(self, pos_cac, pos_cac2, pos_cac3, pos_pte):
-        self.rect_colli_d = self.pos_jump.inflate(-25, -10) #à utiliser quand on aura correctement configuré le saut
+        self.rect_colli_d = self.pos_jump.inflate(-25, -10)
         self.rect_colli_c = pos_cac.inflate(-15, 0)
         self.rect_colli_c2 = pos_cac2.inflate(-15, 0)
         self.rect_colli_c3 = pos_cac3.inflate(-15, 0)

@@ -58,5 +58,4 @@ acc_saut_min = 0.0135 #plus la valeur est élévée plus le dino reste cloué au
 h_saut_min = 264 #hauteur maximale du petit saut en y
 acc_saut_max = 0.009 #plus la valeur est basse plus le dino peut aller haut  => valeur pygame.ticks env 1280
 h_saut_max = 192 #hauteur maximale du grand saut en y
-variation_acc = 0.02 #plus c'est grand plus on ira vite vers acc hauteur max
 vitesse_y_init = 5.6666667
