@@ -353,9 +353,5 @@ def jeu():
                         #Je me dis que si on faisait un graph de l'acc en fct du temps on obtiendrait un logarithme néperien
                         #Faut ptet essayer une fonction exponentielle pour contre-balancer
 while continuer:
-    sound_pas.play(-1)
     jeu()
 pygame.quit()
-#reste à configurer l'acceleration
-#les hitbox pour les collisions
-#donner une petite chance d'avoir les couleurs inversées à chaque centaine
