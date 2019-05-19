@@ -6,7 +6,7 @@ from random import randint, choice
 class perso:
     def __init__(self, pos_x = 0, pos_y = 0):
         self.dim_ecran = (900,500)
-
+        #On charge les images du dino, du ptero et game over
         self.arret = pygame.image.load(image_dino_arret).convert_alpha()
         self.marche1 = pygame.image.load(image_dino_marche1).convert_alpha() #etat 1
         self.marche2 = pygame.image.load(image_dino_marche2).convert_alpha() #etat 2
@@ -55,23 +55,19 @@ class perso:
             if self.etat_d == 1:
                 self.etat_d = 2
                 self.pos_jump.y = self.dim_ecran[1]*0.999-59 #On définie les coordonnées d'affichage du dino
-                """self.y = self.dim_ecran[1]*0.999-59""" #En souvenir de l'époque où on n'utilisait pas rect
                 return self.accroupi1
             elif self.etat_d == 2:
                 self.etat_d = 1
                 self.pos_jump.y = self.dim_ecran[1]*0.999-59 #On définie les coordonnées d'affichage du dino
-                """self.y = self.dim_ecran[1]*0.999-59"""
                 return self.accroupi2
         else:
             if self.etat_d == 1:
                 self.etat_d = 2
                 self.pos_jump.y = self.y #On définie les coordonnées d'affichage du dino
-                """self.y = self.dim_ecran[1]*0.97-70"""
                 return self.marche1
             elif self.etat_d == 2:
                 self.etat_d = 1
                 self.pos_jump.y = self.y #On définie les coordonnées d'affichage du dino
-                """self.y = self.dim_ecran[1]*0.97-70"""
                 return self.marche2
 
     def ptero(self):
@@ -86,7 +82,6 @@ class perso:
     def jump_init(self): #Sert à initialiser le saut (est éxécutée qu'une fois au moment du relachement de la touche espace/flèche haut)
         self.ti=pygame.time.get_ticks()
         self.sens_jump = 1
-        """self.y_initial = self.y"""
 
     def jump(self, a, jauge): #Est éxécutée en boucle mais ne s'active réellement que quand le saut a été initialisé
         if self.ti!=0:
@@ -96,12 +91,11 @@ class perso:
                 acc = a
                 if self.vy_initial != 0: #Si vy_initial n'a pas été mis à 0 (par la touche flèche bas) alors on continue de faire monter le dino
                     self.vy_initial = vitesse_y_init*1.35
-            if self.accroupi:
+            if self.accroupi: #Si la touche flèche bas ou s est préssée alors on accélère la descente et on stoppe toute montée
                 acc = a*4.5
                 self.vy_initial = 0
             t=pygame.time.get_ticks()
-            dift=(t-self.ti)
-            """self.y = (acc/2)*(dift**2)-self.vitesse*dift + self.y_initial"""
+            dift=(t-self.ti) #delta T
             self.vy = acc * dift - self.vy_initial #Formule MTRUV SI (les valeurs sont à l'opposé de ce que l'on a l'habitude de voir)
             self.pos_jump = self.pos_jump.move(0, self.vy) #Déplacement du rect avec la vitesse obtenue
             if (jauge == 0 and self.pos_jump.y <= h_saut_min) or (jauge == 1 and self.pos_jump.y <= h_saut_max): self.sens_jump = 0 #sens du dino (0 = vers le bas, 1 = vers le haut)
@@ -168,20 +162,15 @@ class perso:
         self.img_score5.set_alpha(255)
 
     def update_difficulty(self):
-        #on veut que les deux derniers caractères soient 00, 01 ou 02 (01 et 02 c'est au cas où si on rate 00), cela permmettera d'activer la condition à chaque fois que le score passe une centaine, de plus on active pas la condition si on est encore à 00000/00001/00002 et on veut qu'elle s'éxécute une fois par centaine
+        #on veut que les deux derniers caractères soient 00, 01 ou 02 (01 et 02 c'est au cas où si on rate 00), cela permettra d'activer la condition à chaque fois que le score passe une centaine, de plus on active pas la condition si on est encore à 00000/00001/00002 et on veut qu'elle s'éxécute une fois par centaine
         if self.affiche_score4 == "0" and (self.affiche_score5 == "0" or self.affiche_score5 == "1" or self.affiche_score5 == "2") and self.affiche_score3 != self.affiche_score3_old:
             self.vitesse_sol *= multiplicateur_vitesse
             self.vitesse_pte_min *= multiplicateur_vitesse
             self.vitesse_pte_max *= multiplicateur_vitesse
             self.affiche_score3_old = self.affiche_score3
-        """t = (pygame.time.get_ticks() - self.start_t) * 0.0001 #pour transformer la différence de temps des millisecondes en decasecondes
-        t = int(round(t, 0))/2
-        t = int(round(t))
-        #self.vitesse_nuage = vitesse_nuage + t
-        self.vitesse_sol = vitesse_sol + t
-        self.vitesse_obs = vitesse_sol + t"""
 
     def check_colli(self, pos_cac, pos_cac2, pos_cac3, pos_pte):
+        #Ajuste les dimensions des rects pour la collision
         self.rect_colli_d = self.pos_jump.inflate(-25, -10)
         self.rect_colli_c = pos_cac.inflate(-15, 0)
         self.rect_colli_c2 = pos_cac2.inflate(-15, 0)

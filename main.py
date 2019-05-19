@@ -7,17 +7,19 @@ from os import environ
 
 dim_ecran = (900,500) #Dimension Ecran
 environ['SDL_VIDEO_WINDOW_POS'] = "10, 40" #Détermine la position de la fenetre pour que l'IA lance mette son dispositif de capture à ces positions
-pygame.init()
+pygame.init() #Initialisation des modules de pygame
 
-ecran = pygame.display.set_mode(dim_ecran)
+ecran = pygame.display.set_mode(dim_ecran) #Définition de la fenetre de jeu
 bg = pygame.image.load(image_bg).convert()
 bg = pygame.transform.scale(bg, dim_ecran) #Adaptation du fond à l'écran
 
 #Icone et titre
 icone = pygame.image.load(icon_dino_accueil).convert_alpha()
+#Definition de l'icone et du titre de la fenetre
 pygame.display.set_icon(icone)
 pygame.display.set_caption("Chrome Dino IA")
 
+#Definition des variables globales
 dino, pos_nuage, pos_nuage2, pos_nuage3, pos_nuage4, pos_cac, pos_cac2, pos_cac3, cac, cac2, cac3, pos_pte, img_ptero, temps_trigger_n, temps_trigger_obs, pos_sol, vitesse_ptero, hauteurs = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 HIscore = 0
 continuer = True
@@ -25,7 +27,7 @@ end = True
 
 nuage = pygame.image.load(image_nuage).convert_alpha()
 
-def temps(delay):
+def temps(delay): #Renvoie un temps qui n'est pas encore arrivé
     t = pygame.time.get_ticks() + delay*1000
     return t
 
@@ -176,10 +178,6 @@ def jeu():
         ecran.blit(bg, (0,0))
         if dino.colli:
              #si on implémente pas de compteur on verrait le dino stoppé qui ne touche pas le cactus alors que pourtant c'est le cas, alors je décide de faire X fois la boucle principale le temps que la position du dino arrive sur le cactus puis on commence la boucle de fin
-            """if comp < 10 and dino.pos_jump.colliderect(pos_pte):
-                comp += 1
-            elif comp < 5 and dino.pos_jump.colliderect(pos_pte) == False:
-                comp += 1"""
             #else:
             if dino.accroupi: dino.pos_jump.y = dino.y
             dino.pos_jump.y += 5 #Comme l'image du dino quand il est marche et l'image du dino quand il est mort n'est pas la meme on ajuste alors la position du dino
@@ -328,26 +326,6 @@ def jeu():
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE: continuer = False
 
-                """if event.key == K_SPACE and dino.accroupi == False:
-                    if dino.pos_jump.y == dino.sol:
-                        dino.jump_init()
-                        compteur = acc_hauteur_min #acc correspondant à hauteur min
-                        print(compteur)
-                    if compteur > acc_hauteur_max and dino.vy > 0: #acc correspondant à hauteur max
-                        compteur -= variation_acc #variation de l'acc (permet de connaitre la durée de ESPACE préssé et de varier acc en conséquence)
-                        print(compteur)
-
-                if event.key == K_UP and dino.accroupi == False:
-                    if dino.pos_jump.y == dino.sol:
-                        t_charge_depart = 0
-                        dino.jump_init()
-                        compteur = acc_hauteur_min #acc correspondant à hauteur min
-                    if compteur > acc_hauteur_max and dino.vy > 0: #acc correspondant à hauteur max
-                        compteur -= variation_acc #variation de l'acc (permet de connaitre la durée de FLECHE_HAUT préssé et de varier acc en conséquence)"""
-                        #Trouver le moyen de doser correctement la longue de pression de ESPACE
-                        #Problème: ne va pas très haut car il applique d'abord 0.05 d'acc puis un peu moins, etc...
-                        #Je me dis que si on faisait un graph de l'acc en fct du temps on obtiendrait un logarithme néperien
-                        #Faut ptet essayer une fonction exponentielle pour contre-balancer
 while continuer:
     jeu()
 pygame.quit()

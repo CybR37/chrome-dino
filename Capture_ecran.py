@@ -23,12 +23,13 @@ def read_file(): #Fonction utilisée pour lire le texte de globales.txt
     f = open("globales.txt", "r")
     f_str = f.read()
     f.close()
-    l = f_str.split(",")
-    if len(l) == 2:
+    l = f_str.split(",") #On divise la chaine de caractère en une liste
+    if len(l) == 2: #Si la liste contient deux éléments on actualise la liste du programme
         liste = l
+        #On remplace la chaine de caractère en booléan
         if liste[1] == "False": liste[1] = False
         elif liste[1] == "True": liste[1] = True
-        liste = [int(liste[0]), liste[1]]
+        liste = [int(liste[0]), liste[1]] #On refait la liste pour quelle contienne un nombre entier et un booléan
         return liste
     else: return liste
 
