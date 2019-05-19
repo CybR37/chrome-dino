@@ -181,7 +181,6 @@ def jeu():
             elif comp < 5 and dino.pos_jump.colliderect(pos_pte) == False:
                 comp += 1"""
             #else:
-            dino.etat_d = 0 #on met l'état du dino à 0 qui correspond qu'il a percuté un obstacle
             if dino.accroupi: dino.pos_jump.y = dino.y
             dino.pos_jump.y += 5 #Comme l'image du dino quand il est marche et l'image du dino quand il est mort n'est pas la meme on ajuste alors la position du dino
             #On remet les différentes couches d'image dans l'ordre pour enlever les images à la mauvaise taille/mauvaise position
@@ -237,7 +236,7 @@ def jeu():
                     if event.type == MOUSEBUTTONDOWN and event.button == 1:
                         end = False
 
-            break #une fois qu'une touche ci-dessus a été préssée pour mettre continuer à False on quitte la boucle du jeu ca qui arretera le programme
+            break #on force le programme à recommencer de zéro, si continuer est égal à False alors cela arretera le programme à la place
 
         if end == False:
             dino.img_pts(HIscore)

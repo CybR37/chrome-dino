@@ -10,12 +10,12 @@ import pyautogui
 from entre_direct import PressKey, ReleaseKey, W, S,D
 from collections import deque
 import random
-config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} ) 
-sess = tf.Session(config=config) 
+config = tf.ConfigProto( device_count = {'GPU': 1 , 'CPU': 4} )
+sess = tf.Session(config=config)
 keras.backend.set_session(sess)
 pyautogui.FAILSAFE="False"
 
-liste = [0, "False"]
+liste = [0, False]
 
 def read_file(): #Fonction utilisée pour lire le texte de globales.txt
     global liste
@@ -152,13 +152,13 @@ def trainNetwork(model,game_state):
                      #1=> sauter
 
     x_t, r_0, terminal = game_state.get_state(do_nothing) # récuperer la prochaine étape après avoir effectué une action
-    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,80,80,4) # assembler 4 images pour créer une donnée d'entré redimmensionné à 1*80*80*4 
-    
+    s_t = np.stack((x_t, x_t, x_t, x_t), axis=2).reshape(1,80,80,4) # assembler 4 images pour créer une donnée d'entré redimmensionné à 1*80*80*4
+
     OBSERVE = OBSERVATION
     epsilon = INITIAL_EPSILON
     t = 0
     while (True): #tourne sans fin
-        
+
         loss = 0
         Q_sa = 0
         action_index = 0
@@ -183,12 +183,12 @@ def trainNetwork(model,game_state):
         x_t1, r_t, terminal = game_state.get_state(a_t)
         x_t1 = x_t1.reshape(1, x_t1.shape[0], x_t1.shape[1], 1) #1x80x80x1
         s_t1 = np.append(x_t1, s_t[:, :, :, :3], axis=3) # ajoute une nouvelle image au groupe des 4 dernière et retire la plus vielle
-        
+
         D.append((s_t, action_index, r_t, s_t1, terminal))# enregistre la transition
-        
+
         #s'entrainer seulement si on à fini d'observer; échantillonnez un minibatch sur lequel s'entraîner
         trainBatch(random.sample(D, BATCH),s_t,model) if t > OBSERVE else 0
-        s_t = s_t1 
+        s_t = s_t1
         t += 1
         print("TIMESTEP", t, "/ EPSILON", epsilon, "/ ACTION", action_index, "/ REWARD", r_t,"/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
 def trainBatch(minibatch,s_t,model):
