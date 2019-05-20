@@ -1,4 +1,4 @@
 @echo off
-start main.bat
-start cap.bat
+start main.exe
+start IA.bat
 exit
